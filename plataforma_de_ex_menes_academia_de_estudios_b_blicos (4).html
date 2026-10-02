@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plataforma de Exámenes - Academia de Estudios Bíblicos</title>
+    
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-warm: #1e4555;      /* Azul petróleo cálido */
+            --primary-accent: #b87d4b;    /* Terracota / Oro cálido */
+            --primary-hover: #15323e;
+            --bg-warm: #fbf7f0;           /* Crema cálido */
+            --card-bg: #ffffff;
+            --card-border: #e6dac8;
+            --text-dark: #2c2520;
+            --text-muted: #6e6359;
+            --correct-bg: #eaf5ea;
+            --correct-border: #2e7d32;
+            --correct-text: #1b5e20;
+            --incorrect-bg: #fde8e8;
+            --incorrect-border: #c62828;
+            --incorrect-text: #b71c1c;
+            --shadow-soft: 0 8px 25px rgba(184, 125, 75, 0.08);
+            --radius-main: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-warm);
+            color: var(--text-dark);
+            font-family: 'Lato', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 30px 15px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* MARCA DE AGUA FLORAL DE FONDO */
+        .floral-watermark-left {
+            position: fixed;
+            top: -50px;
+            left: -80px;
+            width: 380px;
+            height: 380px;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floral-watermark-right {
+            position: fixed;
+            bottom: -60px;
+            right: -80px;
+            width: 420px;
+            height: 420px;
+            opacity: 0.08;
+            pointer-events: none;
+            z-index: 0;
+            transform: rotate(180deg);
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1020px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-main);
+            box-shadow: var(--shadow-soft);
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e4555 0%, #163340 100%);
+            color: #ffffff;
+            padding: 35px 30px;
+            text-align: center;
+            position: relative;
+            border-bottom: 4px solid var(--primary-accent);
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            color: #ffffff;
+        }
+
+        .header p {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.88);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 400;
+        }
+
+        .flower-icon-header {
+            color: var(--primary-accent);
+            font-size: 20px;
+            margin: 0 8px;
+        }
+
+        .dashboard-screen {
+            padding: 40px 30px;
+            display: block;
+        }
+
+        .welcome-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: var(--primary-warm);
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .exams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 18px;
+            margin-bottom: 35px;
+        }
+
+        .exam-card {
+            background: var(--primary-warm);
+            color: #ffffff;
+            border-radius: 12px;
+            padding: 22px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 15px rgba(30, 69, 85, 0.15);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 110px;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exam-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-accent);
+            opacity: 0.8;
+        }
+
+        .exam-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(30, 69, 85, 0.25);
+            border-color: var(--primary-accent);
+            background: var(--primary-hover);
+        }
+
+        .exam-card .exam-title {
+            font-family: 'Poppins', sans-serif;
+            font-size: 14px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 6px;
+            line-height: 1.3;
+        }
+
+        .exam-card .exam-subtitle {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            color: #f1e6d4;
+            font-style: italic;
+        }
+
+        .special-section-container {
+            background: #fdfaf5;
+            border: 2px dashed #d8c6b0;
+            border-radius: 14px;
+            padding: 28px;
+            margin-top: 10px;
+            position: relative;
+        }
+
+        .special-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: var(--primary-accent);
+            color: #ffffff;
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+        }
+
+        .graduation-blocks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .block-card {
+            background: #ffffff;
+            border: 2px solid var(--card-border);
+            border-radius: 10px;
+            padding: 16px 14px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .block-card:hover {
+            border-color: var(--primary-accent);
+            background-color: #fffdfa;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.06);
+        }
+
+        .block-card .block-num {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--primary-warm);
+            margin-bottom: 4px;
+        }
+
+        .block-card .block-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ESTILOS DE LA PANTALLA DE PREGUNTAS (ESTRUCTURA WORD EXACTA) */
+        .quiz-screen {
+            display: none;
+            padding: 35px 30px;
+        }
+
+        .quiz-nav-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid var(--card-border);
+        }
+
+        .btn-back {
+            background: transparent;
+            border: none;
+            color: var(--primary-warm);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color 0.2s;
+        }
+
+        .btn-back:hover {
+            color: var(--primary-accent);
+        }
+
+        .quiz-info-badge {
+            font-family: 'Poppins', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: #f4ede2;
+            padding: 5px 14px;
+            border-radius: 20px;
+        }
+
+        .question-number-header {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            font-size: 17px;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+        }
+
+        .question-text-content {
+            font-family: 'Lato', sans-serif;
+            font-size: 17px;
+            font-weight: 700;
+            color: #1a1a1a;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            white-space: pre-line;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-bottom: 30px;
+        }
+
+        .option-card {
+            background: #f8f7f5;
+            border: 1px solid #e2ded7;
+            border-radius: 12px;
+            padding: 16px 20px;
+            font-size: 15.5px;
+            font-family: 'Lato', sans-serif;
+            color: #2c2c2c;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            line-height: 1.6;
+        }
+
+        .option-card:hover:not(.disabled) {
+            background-color: #f0ece5;
+            border-color: #c8bead;
+        }
+
+        .option-card .opt-letter {
+            font-weight: 700;
+            font-size: 15px;
+            color: #1e4555;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .option-text-formatted {
+            flex-grow: 1;
+            white-space: pre-line;
+        }
+
+        .option-card.selected-correct {
+            background-color: var(--correct-bg) !important;
+            border-color: var(--correct-border) !important;
+            color: var(--correct-text) !important;
+            font-weight: 700;
+        }
+
+        .option-card.selected-incorrect {
+            background-color: var(--incorrect-bg) !important;
+            border-color: var(--incorrect-border) !important;
+            color: var(--incorrect-text) !important;
+        }
+
+        .option-card.disabled {
+            cursor: default;
+        }
+
+        .feedback-panel {
+            margin-top: 20px;
+            padding: 18px 20px;
+            border-radius: 10px;
+            display: none;
+            animation: fadeIn 0.3s ease-in-out;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .feedback-panel.show { display: block; }
+        .feedback-panel.correct { background: #f1f8e9; border-left: 5px solid var(--correct-border); color: var(--correct-text); }
+        .feedback-panel.incorrect { background: #ffebee; border-left: 5px solid var(--incorrect-border); color: var(--incorrect-text); }
+
+        .quiz-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--card-border);
+        }
+
+        .btn-main {
+            background: var(--primary-accent);
+            border: none;
+            color: #ffffff;
+            padding: 12px 28px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 15px;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(184, 125, 75, 0.25);
+        }
+
+        .btn-main:hover:not(:disabled) { background: #9f6738; transform: translateY(-2px); }
+        .btn-main:disabled { background: #cccccc; box-shadow: none; cursor: not-allowed; }
+
+        .results-screen { display: none; padding: 40px 30px; text-align: center; }
+        .results-badge-icon { font-size: 65px; color: var(--primary-accent); margin-bottom: 18px; }
+        .score-display { font-family: 'Playfair Display', serif; font-size: 50px; font-weight: 700; color: var(--primary-warm); margin: 10px 0; }
+        .score-summary-text { font-size: 15px; color: var(--text-muted); max-width: 600px; margin: 0 auto 30px auto; }
+        .results-review-list { text-align: left; margin-top: 35px; display: flex; flex-direction: column; gap: 16px; }
+        .review-card-item { background: #ffffff; border: 1px solid var(--card-border); padding: 18px; border-radius: 10px; }
+        .review-card-item.is-correct { border-left: 5px solid var(--correct-border); }
+        .review-card-item.is-incorrect { border-left: 5px solid var(--incorrect-border); }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        @media (max-width: 640px) {
+            .exams-grid { grid-template-columns: 1fr; }
+            .header { padding: 25px 18px; }
+            .header h1 { font-size: 20px; }
+            .dashboard-screen, .quiz-screen, .results-screen { padding: 22px 16px; }
+            .question-text-content { font-size: 15.5px; }
+            .option-card { font-size: 14px; padding: 12px 14px; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- MARCA DE AGUA FLORAL SVG (IZQUIERDA) -->
+    <svg class="floral-watermark-left" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M100 20C100 20 80 60 40 60C40 60 80 80 80 120C80 120 100 80 140 80C140 80 100 60 100 20Z" fill="#1e4555"/>
+        <path d="M100 180C100 180 120 140 160 140C160 140 120 120 120 80C120 80 100 120 60 120C60 120 100 140 100 180Z" fill="#b87d4b"/>
+        <circle cx="100" cy="100" r="12" fill="#1e4555"/>
+    </svg>
+
+    <!-- MARCA DE AGUA FLORAL SVG (DERECHA) -->
+    <svg class="floral-watermark-right" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M100 20C100 20 80 60 40 60C40 60 80 80 80 120C80 120 100 60 100 20Z" fill="#b87d4b"/>
+        <path d="M100 180C100 180 120 140 160 140C160 140 120 120 120 80C120 80 100 120 60 120C60 120 100 140 100 180Z" fill="#1e4555"/>
+        <circle cx="100" cy="100" r="12" fill="#b87d4b"/>
+    </svg>
+
+    <div class="container">
+        <div class="header">
+            <h1><i class="fa-solid fa-seedling flower-icon-header"></i> Academia de Estudios Bíblicos <i class="fa-solid fa-seedling flower-icon-header"></i></h1>
+            <p>Plataforma Interactiva de Verificación y Repaso de Exámenes del Año</p>
+        </div>
+
+        <!-- DASHBOARD / SELECCIÓN DE EXÁMENES DEL AÑO -->
+        <div class="dashboard-screen" id="dashboardScreen">
+            <h2 class="welcome-title">
+                <i class="fa-solid fa-leaf" style="color: var(--primary-accent);"></i>
+                Bienvenida, ¿con cuál examen quieres estudiar?
+            </h2>
+
+            <div class="special-section-container" style="margin-bottom: 35px; margin-top: 10px;">
+                <span class="special-badge"><i class="fa-solid fa-graduation-cap"></i> Sección Especial</span>
+                <h3 style="font-family: 'Playfair Display', serif; font-size: 21px; color: var(--primary-warm); margin-bottom: 6px;">Examen de Graduación Integral (40 Preguntas)</h3>
+                <p style="font-size: 14px; color: var(--text-muted); line-height: 1.5;">Puedes repasar el examen de graduación progresivamente en bloques de 10 preguntas o realizar el examen completo de 40 preguntas.</p>
+
+                <div class="graduation-blocks-grid">
+                    <div class="block-card" onclick="startGraduationBlock(1)">
+                        <div class="block-num">PARTE 1</div>
+                        <div class="block-sub">Preguntas 1 a 10</div>
+                    </div>
+                    <div class="block-card" onclick="startGraduationBlock(2)">
+                        <div class="block-num">PARTE 2</div>
+                        <div class="block-sub">Preguntas 11 a 20</div>
+                    </div>
+                    <div class="block-card" onclick="startGraduationBlock(3)">
+                        <div class="block-num">PARTE 3</div>
+                        <div class="block-sub">Preguntas 21 a 30</div>
+                    </div>
+                    <div class="block-card" onclick="startGraduationBlock(4)">
+                        <div class="block-num">PARTE 4</div>
+                        <div class="block-sub">Preguntas 31 a 40</div>
+                    </div>
+                </div>
+
+                <button class="btn-main" style="width: 100%; margin-top: 18px; justify-content: center;" onclick="startGraduationBlock('all')">
+                    <i class="fa-solid fa-book-open"></i> Realizar Examen Completo de Graduación (40 Preguntas)
+                </button>
+            </div>
+
+            <h3 style="font-family: 'Playfair Display', serif; font-size: 20px; color: var(--primary-warm); margin-bottom: 18px;">
+                <i class="fa-solid fa-book-bookmark" style="color: var(--primary-accent); font-size: 18px; margin-right: 6px;"></i>
+                Exámenes Individuales del Año (1 al 14)
+            </h3>
+
+            <!-- TARJETAS DE EXÁMENES DEL AÑO (1 AL 14) -->
+            <div class="exams-grid">
+                <div class="exam-card" onclick="startExam('exam_1')">
+                    <div class="exam-title">EXAMEN 1.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 20</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_2')">
+                    <div class="exam-title">EXAMEN 2.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 4</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_3')">
+                    <div class="exam-title">EXAMEN 3.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 5</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_4')">
+                    <div class="exam-title">EXAMEN 4.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 1</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_5')">
+                    <div class="exam-title">EXAMEN 5.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 2 y 3</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_6')">
+                    <div class="exam-title">EXAMEN 6.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 14 y Repaso</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_7')">
+                    <div class="exam-title">EXAMEN 7.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 7</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_8')">
+                    <div class="exam-title">EXAMEN 8.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">8.ª Ronda de Confirmación</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_9')">
+                    <div class="exam-title">EXAMEN 9.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">9.ª Ronda de Confirmación</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_10')">
+                    <div class="exam-title">EXAMEN 10.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">10.ª Ronda de Confirmación</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_11')">
+                    <div class="exam-title">EXAMEN 11.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 6 y 17</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_12')">
+                    <div class="exam-title">EXAMEN 12.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 8, 9, 13</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_13')">
+                    <div class="exam-title">EXAMEN 13.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 13 y Realidades</div>
+                </div>
+                <div class="exam-card" onclick="startExam('exam_14')">
+                    <div class="exam-title">EXAMEN 14.º SHINCHEONJI</div>
+                    <div class="exam-subtitle">Apocalipsis 20 y Repaso</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANTALLA DEL QUIZ -->
+        <div class="quiz-screen" id="quizScreen">
+            <div class="quiz-nav-top">
+                <button class="btn-back" onclick="returnToDashboard()">
+                    <i class="fa-solid fa-arrow-left"></i> Volver a Selección
+                </button>
+                <div class="quiz-info-badge" id="quizProgressBadge">Pregunta 1 de 10</div>
+            </div>
+
+            <div class="question-number-header" id="questionNumHeader">Pregunta 1</div>
+            <div class="question-text-content" id="questionText">Cargando pregunta...</div>
+
+            <div class="options-container" id="optionsContainer">
+                <!-- Generado dinámicamente -->
+            </div>
+
+            <div class="feedback-panel" id="feedbackPanel"></div>
+
+            <div class="quiz-actions">
+                <div style="font-size: 14px; font-weight: 600; color: var(--text-muted);" id="liveScoreTracker">
+                    Aciertos: 0
+                </div>
+                <button class="btn-main" id="btnNext" onclick="nextQuestion()" disabled>
+                    Siguiente Pregunta <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- PANTALLA DE RESULTADOS -->
+        <div class="results-screen" id="resultsScreen">
+            <div class="results-badge-icon"><i class="fa-solid fa-award"></i></div>
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 30px; color: var(--primary-warm);" id="resultsExamTitle">¡Examen Completado!</h2>
+            <div class="score-display" id="finalScoreDisplay">0 / 10</div>
+            <p class="score-summary-text" id="finalScoreComment">Has finalizado tu prueba de repaso.</p>
+
+            <button class="btn-main" onclick="returnToDashboard()">
+                <i class="fa-solid fa-house"></i> Volver al Menú Principal
+            </button>
+
+            <div class="results-review-list" id="reviewList"></div>
+        </div>
+    </div>
+
+    <script>
+        
+        // HELPER PARA FORMATEAR SUB-ELEMENTOS ①, ②, ③ EN RENGLONES INDEPENDIENTES (IGUAL AL WORD)
+        function formatSubItems(text) {
+            if (!text) return '';
+            // Insertar salto de línea antes de cada círculo ①, ②, ③, ④ si no está al principio
+            return text
+                .replace(/([^\n])(①|②|③|④|⑤)/g, '$1\n$2')
+                .trim();
+        }
+
+        // BASE DE DATOS COMPLETA DE EXÁMENES (1 AL 14 + GRADUACIÓN 40 PREGUNTAS)
+        const EXAMS_DATABASE = {
+            'exam_1': {
+                title: "Examen 1.º Shincheonji",
+                subtitle: "Apocalipsis 20",
+                questions: [
+                    {
+                        q: "① ¿Quiénes son los que participan en la primera resurrección en Apocalipsis 20? y ② ¿cuánto tiempo reinarán con Cristo?",
+                        options: [
+                            "① Los espíritus de los mártires y los santos que recibieron el sello de Dios sin la marca de la bestia.\n② Mil años.",
+                            "① Todos los habitantes del mundo sin distinción.\n② Para siempre jamás sin límite.",
+                            "① Solamente los doce apóstoles en la tierra.\n② Cien años."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Los espíritus de los mártires y los que no adoraron a la bestia ni recibieron su marca.\n② Reinarán con Cristo por mil años (Ap 20:4-6)."
+                    }
+                ]
+            },
+            'exam_2': {
+                title: "Examen 2.º Shincheonji",
+                subtitle: "Apocalipsis 4",
+                questions: [
+                    {
+                        q: "① ¿Qué vio Juan cuando fue abierto el cielo en Apocalipsis 4? y ② ¿dónde desciende este trono en el tiempo del cumplimiento?",
+                        options: [
+                            "① El trono de Dios en el cielo, los 24 ancianos y los cuatro seres vivientes.\n② Al monte Sion en Apocalipsis 14.",
+                            "① El mar de fuego y el abismo.\n② A la Jerusalén física en el Medio Oriente.",
+                            "① Las siete copas de oro y los ángeles.\n② Al desierto."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① El trono de Dios en el cielo (Ap 4).\n② Desciende sobre el monte Sion con las 12 tribus (Ap 14 / Ap 21)."
+                    }
+                ]
+            },
+            'exam_3': {
+                title: "Examen 3.º Shincheonji",
+                subtitle: "Apocalipsis 5",
+                questions: [
+                    {
+                        q: "① ¿Qué había en la mano derecha del que estaba sentado en el trono en Apocalipsis 5? y ② ¿quién fue el único digno de tomarlo y abrirlo?",
+                        options: [
+                            "① Un libro escrito por dentro y por fuera, sellado con siete sellos.\n② El Cordero (Jesús).",
+                            "① Una copa de oro llena de incienso.\n② El apóstol Juan.",
+                            "① Una vara de hierro para regir a las naciones.\n② Uno de los cuatro seres vivientes."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Un libro sellado con 7 sellos (Ap 5:1).\n② El León de la tribu de Judá, la Raíz de David, el Cordero (Ap 5:5-7)."
+                    }
+                ]
+            },
+            'exam_4': {
+                title: "Examen 4.º Shincheonji",
+                subtitle: "Apocalipsis 1",
+                questions: [
+                    {
+                        q: "① ¿Cómo se transmite la revelación de Jesucristo en Apocalipsis 1:1-3? y ② ¿quiénes son los bienaventurados?",
+                        options: [
+                            "① Dios → Jesús → Ángel → Juan → Siervos.\n② El que lee, los que oyen y los que guardan la palabra de la profecía.",
+                            "① Dios → Profetas → Reyes → Pueblos.\n② Todos los hombres del mundo.",
+                            "① Jesús → Discípulos → Escritores.\n② Solamente los sacerdotes."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Cadena de transmisión: Dios → Jesús → Ángel → Juan → Siervos.\n② Los bienaventurados son los que leen, oyen y guardan (Ap 1:1-3)."
+                    }
+                ]
+            },
+            'exam_5': {
+                title: "Examen 5.º Shincheonji",
+                subtitle: "Apocalipsis 2 y 3",
+                questions: [
+                    {
+                        q: "① ¿A quiénes envió Juan las cartas en Apocalipsis 2 y 3? y ② ¿cuál es la promesa principal para 'el que venza'?",
+                        options: [
+                            "① A los siete mensajeros de las siete iglesias.\n② Comer del árbol de la vida, el maná escondido, y sentarse con Jesús en su trono.",
+                            "① A las naciones gentiles de Roma.\n② Riquezas materiales y poder terrenal.",
+                            "① A los apóstoles del Antiguo Testamento.\n② Ir inmediatamente al cielo sin luchar."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① A los 7 mensajeros de las 7 iglesias.\n② Las 12 bendiciones prometidas en Ap 2~3 para el Vencedor."
+                    }
+                ]
+            },
+            'exam_6': {
+                title: "Examen 6.º Shincheonji",
+                subtitle: "Apocalipsis 14 y Repaso",
+                questions: [
+                    {
+                        q: "① ¿Dónde están de pie los 144,000 en Apocalipsis 14:1? y ② ¿qué tienen escrito en sus frentes?",
+                        options: [
+                            "① Sobre el monte Sion.\n② El nombre del Cordero y el nombre de su Padre.",
+                            "① En el mar de vidrio.\n② La marca de la bestia 666.",
+                            "① En el desierto de Judea.\n② El número de su tribu solamente."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Sobre el monte Sion con el Cordero.\n② Tienen escrito el nombre del Cordero y del Padre (Ap 14:1)."
+                    }
+                ]
+            },
+            'exam_7': {
+                title: "Examen 7.º Shincheonji",
+                subtitle: "Apocalipsis 7",
+                questions: [
+                    {
+                        q: "① ¿Cuántos son los sellados en Apocalipsis 7 de todas las tribus de los hijos de Israel? y ② ¿quiénes aparecen después de los sellados?",
+                        options: [
+                            "① 144,000 (12,000 de cada tribu).\n② Una gran multitud vestida de ropas blancas que nadie podía contar.",
+                            "① 7,000 personas.\n② Los reyes de la tierra.",
+                            "① 12,000 en total.\n② Los destructores del mar."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① 144,000 sellados de las 12 tribus (Ap 7:4).\n② La gran multitud vestida de blanco salida de la gran tribulación (Ap 7:9)."
+                    }
+                ]
+            },
+            'exam_8': {
+                title: "Examen 8.º Shincheonji",
+                subtitle: "8.ª Ronda de Confirmación",
+                questions: [
+                    {
+                        q: "① Con respecto a la carta enviada en Apocalipsis 2 y 3, ¿cuántas cosas se escribieron en ella y qué son? y ② ¿cuáles son las tres entidades que aparecen?",
+                        options: [
+                            "① Tres cosas: las cosas que has visto, y las que son, y las que han de ser después de estas.\n② Los siete mensajeros, los nicolaítas y Juan.",
+                            "① Dos cosas: el juicio y la bendición.\n② Reyes, sacerdotes y profetas.",
+                            "① Cuatro cosas: sellos, trompetas, copas y libros.\n② Ángeles, demonios y hombres."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Tres cosas (Ap 1:19 / Ap 2-3).\n② Los 7 mensajeros, los nicolaítas y Juan."
+                    }
+                ]
+            },
+
+            'exam_9': {
+                title: "Examen 9.º Shincheonji",
+                subtitle: "9.ª Ronda de Confirmación",
+                questions: [
+                    {
+                        q: "① ¿Después de qué acontecimiento existen el reino y la salvación de Dios? y ② ¿en qué capítulo se cumplieron las promesas de Apocalipsis 2 y 3?",
+                        options: [
+                            "① Después de luchar y vencer al grupo del dragón.\n② Se cumplieron en Apocalipsis 12.",
+                            "① Antes de que comience el juicio.\n② Se cumplieron en Apocalipsis 6.",
+                            "① Durante el toque de la primera trompeta.\n② Se cumplieron en Apocalipsis 18."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Tras luchar y vencer al grupo del dragón (Ap 12:9-11).\n② Promesas cumplidas en Apocalipsis 12."
+                    }
+                ]
+            },
+            'exam_10': {
+                title: "Examen 10.º Shincheonji",
+                subtitle: "10.ª Ronda de Confirmación",
+                questions: [
+                    {
+                        q: "De acuerdo con Apocalipsis 14:1, los 144,000 que tienen escrito en la frente el nombre del Cordero y de su Padre, ① ¿en qué capítulo recibieron este sellamiento? y ② ¿de dónde provienen?",
+                        options: [
+                            "① Lo recibieron en Apocalipsis 7.\n② Provienen del campo de la cosecha.",
+                            "① Lo recibieron en Apocalipsis 2.\n② Provienen del mar de Babilonia.",
+                            "① Lo recibieron en Apocalipsis 13.\n② Provienen de las iglesias tradicionales."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Sellados en Apocalipsis 7.\n② Cosechados del campo (Mt 13 / Ap 14)."
+                    }
+                ]
+            },
+            'exam_11': {
+                title: "Examen 11.º Shincheonji",
+                subtitle: "Apocalipsis 6 y 17",
+                questions: [
+                    {
+                        q: "1. En la segunda venida del Señor, la cosecha se realiza ① ¿después de qué acontecimiento? y ② ¿cuáles son los versículos (capítulos) relacionados?",
+                        options: [
+                            "① Después de que el sol, la luna y las estrellas del primer cielo se oscurezcan y caigan.\n② Mt 24:29–31 y Ap 6–7.",
+                            "① Después de tocar las siete trompetas de juicio.\n② Ap 8 y Ap 9.",
+                            "① Después de derramar la primera copa.\n② Ap 16:1-3."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Después de que el sol, luna y estrellas del primer cielo caigan.\n② Mt 24:29-31 y Ap 6-7."
+                    },
+                    {
+                        q: "2. En el Apocalipsis, ¿cuál es el alimento que da el pastor escogido por Jesús? Escríbalo junto con los versículos correspondientes.",
+                        options: [
+                            "Ap 2:17 el maná escondido, Ap 10 la palabra de la revelación, Ap 22 el fruto del árbol de la vida.",
+                            "Ap 6 el vino del juicio, Ap 8 las trompetas, Ap 13 la marca de la bestia.",
+                            "Ap 1:20 los siete candeleros, Ap 4 el mar de vidrio."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial: Ap 2:17 (maná escondido), Ap 10 (revelación), Ap 22 (fruto de vida)."
+                    }
+                ]
+            },
+            'exam_12': {
+                title: "Examen 12.º Shincheonji",
+                subtitle: "Apocalipsis 8, 9, 13",
+                questions: [
+                    {
+                        q: "① ¿Cuáles son los tres capítulos de Apocalipsis donde la bestia gentil (el Destructor) juzga el tabernáculo del pueblo escogido? y ② ¿cuál es la realidad de las siete trompetas recibidas por los siete ángeles, junto con los capítulos correspondientes?",
+                        options: [
+                            "① Ap 8, Ap 9, Ap 13\n② Santos sacados como semilla de fe en Ap 6.",
+                            "① Ap 2, Ap 3, Ap 12\n② Ángeles que derraman las siete copas en Ap 15.",
+                            "① Ap 16, Ap 17, Ap 18\n② Mártires que resucitan en Ap 20."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Ap 8, Ap 9, Ap 13.\n② Santos sacados como semilla de fe en Ap 6."
+                    }
+                ]
+            },
+            'exam_13': {
+                title: "Examen 13.º Shincheonji",
+                subtitle: "Apocalipsis 13 y Realidades",
+                questions: [
+                    {
+                        q: "En el Apocalipsis se mencionan dos tipos de alimentos. ① ¿Cuáles son los alimentos que da el pastor de Dios y ② en qué capítulos se encuentran?",
+                        options: [
+                            "① El maná escondido, la palabra de la revelación y el fruto del árbol de la vida.\n② Ap 2, Ap 10 y Ap 22.",
+                            "① Las paneras del cielo y la copa del banquete.\n② Ap 4 y Ap 19.",
+                            "① La ley de Moisés y el agua del mar.\n② Ap 15."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Maná escondido, palabra revelada, fruto del árbol de la vida.\n② Ap 2, Ap 10, Ap 22."
+                    }
+                ]
+            },
+            'exam_14': {
+                title: "Examen 14.º Shincheonji (Tipo B)",
+                subtitle: "Apocalipsis 20 y Repaso",
+                questions: [
+                    {
+                        q: "1. En el tiempo del cumplimiento del Apocalipsis, ¿cuáles son ① \"las cosas que deben suceder pronto\" que Dios pretende mostrar a sus siervos, y quiénes son ② los \"siervos que recibirán la revelación\"? [20 puntos]",
+                        options: [
+                            "① Los acontecimientos de todo el libro de Apocalipsis; es decir, la realidad.\n② Los 144.000 de las 12 tribus y la multitud vestida de blanco en Ap 7",
+                            "① Las profecías del Antiguo Testamento escritas por los profetas.\n② Los pastores tradicionales y los teólogos del mundo.",
+                            "① La destrucción física de la tierra al final de los tiempos.\n② Todos los creyentes sin sellar."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① Los acontecimientos de todo el libro de Apocalipsis; es decir, la realidad.\n② Los 144.000 de las 12 tribus y la multitud vestida de blanco en Ap 7"
+                    },
+                    {
+                        q: "2. En el libro del Apocalipsis del Nuevo Testamento, ① ¿cuántos versículos contienen la palabra «misterio» y ② dónde se encuentran? [10 puntos]",
+                        options: [
+                            "① 4\n② Ap 1:20, Ap 10:7, Ap 17:5, Ap 17:7",
+                            "① 3\n② Ap 1:1, Ap 7:4, Ap 13:18",
+                            "① 5\n② Ap 2:17, Ap 6:2, Ap 12:1"
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial:\n① 4\n② Ap 1:20, Ap 10:7, Ap 17:5, Ap 17:7"
+                    },
+                    {
+                        q: "3. ¿Qué significa que en Apocalipsis 3:12 está escrito: “Escribiré sobre el que venza el nombre de Dios, el nombre de la santa ciudad, la nueva Jerusalén, y el nuevo nombre de Jesús”? [10 puntos]",
+                        options: [
+                            "Dios, el cielo y Jesús vienen al vencedor",
+                            "Que el vencedor irá al cielo invisible de inmediato.",
+                            "Que se escribirá una nueva Biblia en papel."
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial: Dios, el cielo y Jesús vienen al vencedor"
+                    },
+                    {
+                        q: "40. Escriba ① la razón por la que el Apocalipsis es el libro más importante en el momento de la Segunda Venida del Señor con el versículo que respalda. ② ¿Cuál es la \"verdad suprema\" y ③ dónde se encuentra?",
+                        options: [
+                            "① Porque añadir o quitar impide entrar al cielo (Ap 22:18-19).\n② Ap 1 a 22\n③ Shincheonji, la Ciudad de la Verdad",
+                            "① Porque fue escrito por Juan en la isla de Patmos.\n② Los diez mandamientos\n③ En Jerusalén física",
+                            "① Porque contiene símbolos antiguos.\n② Los libros poéticos\n③ En los seminarios del mundo"
+                        ],
+                        correct: 0,
+                        explanation: "Respuesta Oficial (Estructura Word):\n① Porque añadir o quitar impide entrar al cielo (Ap 22:18-19).\n② Ap 1 a 22\n③ Shincheonji, la Ciudad de la Verdad"
+                    }
+                ]
+            }
+        };
+
+        const GRADUATION_QUESTIONS = [
+            {
+                q: "1. ¿Quién soy yo según la Biblia? Escribe junto con los capítulos relacionados de la Biblia.",
+                options: [
+                    "Yo, en el tiempo del cumplimiento de Apocalipsis, he nacido de la semilla de Dios, he sido cosechado y sellado, pertenezco a las 12 Tribus de Ap 7 y soy la realidad física de las primicias de Ap 14.",
+                    "Un creyente común que asiste a cualquier denominación del mundo esperando ir al cielo al morir.",
+                    "Un estudiante de teología tradicional que aprende sermones según los comentarios."
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\nYo, en el tiempo del cumplimiento de Apocalipsis, he nacido de la semilla de Dios, he sido cosechado y sellado, pertenezco a las 12 Tribus de Ap 7 y soy la realidad física de las primicias de Ap 14."
+            },
+            {
+                q: "2. ¿Cuál es la prueba de haber sido verdaderamente creado según la Biblia?",
+                options: [
+                    "Haber sido cosechado, sellado y pertenecer a las 12 Tribus de Ap 7",
+                    "Estar bautizado en agua y asistir fielmente todos los domingos.",
+                    "Saber recitar los Diez Mandamientos de memoria."
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial: Haber sido cosechado, sellado y pertenecer a las 12 Tribus de Ap 7"
+            },
+            {
+                q: "3. En la Biblia existen el árbol de la vida y el árbol de la ciencia del bien y el mal. Escriba qué es el ① fruto del árbol de la vida y qué es el ② fruto del árbol del bien y del mal, hoy en día, respectivamente.",
+                options: [
+                    "① Palabra de la realidad de Apocalipsis\n② Las falsas doctrinas de los falsos pastores (comentarios)",
+                    "① La manzana del Edén\n② La uva silvestre del desierto",
+                    "① Los diez mandamientos\n② Las tradiciones orales"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Palabra de la realidad de Apocalipsis\n② Las falsas doctrinas de los falsos pastores (comentarios)"
+            },
+            {
+                q: "4. Escriba ① cuáles son los dos tipos de revelaciones que Dios da, entre estos ② cuál es la revelación que deben recibir los siervos de Dios durante el cumplimiento de Apocalipsis, y ③ cuál es el proceso por el que se transmite esta revelación.",
+                options: [
+                    "① Revelación profética en visión, Revelación de la realidad cumplida\n② Revelación de la realidad cumplida\n③ Dios → Jesús → Ángel → Nuevo Juan → Siervos",
+                    "① Revelación escrita y Revelación oral\n② Revelación escrita\n③ Dios → Moisés → Profetas → Pueblos",
+                    "① Revelación general y Revelación especial\n② Revelación general\n③ Dios → Ángeles → Creyentes"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Revelación profética en visión, Revelación de la realidad cumplida\n② Revelación de la realidad cumplida\n③ Dios → Jesús → Ángel → Nuevo Juan → Siervos"
+            },
+            {
+                q: "5. Escriba quiénes son ① 'el que lee', ② 'los que oyen' y ③ 'los que guardan' en Ap 1:3 junto a sus correspondientes capítulos relacionados.",
+                options: [
+                    "① El Nuevo Juan quien recibió y comió el libro abierto, Ap 10\n② Pueblos, naciones, lenguas y reyes quienes aprenden del Nuevo Juan, Ap 10:11\n③ Incluyendo al Nuevo Juan, los 144,000 y la multitud en blanco de las 12 Tribus, Ap 7",
+                    "① Los lectores de la Biblia física\n② La congregación dominical\n③ Los pastores del mundo",
+                    "① El apóstol Juan en el pasado\n② Los israelitas en el desierto\n③ Los santos del Antiguo Testamento"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① El Nuevo Juan quien recibió y comió el libro abierto, Ap 10\n② Pueblos, naciones, lenguas y reyes quienes aprenden del Nuevo Juan, Ap 10:11\n③ Incluyendo al Nuevo Juan, los 144,000 y la multitud en blanco de las 12 Tribus, Ap 7"
+            },
+            {
+                q: "6. Escriba ① con la aparición de quién comienza el cumplimiento de Apocalipsis junto al pasaje bíblico relacionado, y también escriba ② cuándo y ③ dónde aparecieron las realidades del cumplimiento de Apocalipsis.",
+                options: [
+                    "① Jesús de la segunda venida, Ap 1,2,3\n② Año 1966\n③ Templo del Tabernáculo, debajo del Monte Cheonggye en Gwacheon",
+                    "① El profeta Elías, Malaquías 4\n② Año 1914\n③ Jerusalén",
+                    "① El apóstol Pablo, Hechos 9\n② Año 70 d.C.\n③ Roma"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Jesús de la segunda venida, Ap 1,2,3\n② Año 1966\n③ Templo del Tabernáculo, debajo del Monte Cheonggye en Gwacheon"
+            },
+            {
+                q: "7. ① Cuántos y cuáles son los contenidos de las cartas enviadas en Ap 2~3, escriba en orden ② las 3 entidades que aparecen en Ap 2~3 y ③ lo que hicieron cada uno.",
+                options: [
+                    "① Tres contenidos: las cosas que has visto, y las que son, y las que han de ser después de estas\n② Siete mensajeros, Nicolaítas, Juan\n③ Siete mensajeros: la obra de los candeleros que preparan el camino\nNicolaítas: cosas sacrificadas a los ídolos y la doctrina, fornicación\nJuan: carta sobre el arrepentimiento y la palabra de la promesa",
+                    "① Dos contenidos: bendición y maldición\n② Ángeles, demonios y hombres\n③ Obras de enseñanza y oración",
+                    "① Cuatro contenidos: sellos, trompetas, copas y libro\n② Reyes, sacerdotes y profetas\n③ Gobernar y enseñar"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Tres contenidos: las cosas que has visto, y las que son, y las que han de ser después de estas\n② Siete mensajeros, Nicolaítas, Juan\n③ Siete mensajeros: obra de los candeleros / Nicolaítas: idolatrías y fornicación / Juan: arrepentimiento y promesa"
+            },
+
+            {
+                q: "8. Escriba cuáles son los 3 misterios de Apocalipsis junto a sus respectivos pasajes bíblicos.",
+                options: [
+                    "① El misterio de las siete estrellas y los siete candelabros de oro, Ap 1:20\n② El misterio de la prostituta, Babilonia y la bestia de siete cabezas y diez cuernos, Ap 17:5~7\n③ El misterio de la séptima y última trompeta, Ap 10:7",
+                    "① Misterio del arca de la alianza\n② Misterio de la creación\n③ Misterio de Babel",
+                    "① Misterio del bautismo\n② Misterio del diezmo\n③ Misterio de los milagros"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① El misterio de las siete estrellas y los siete candelabros de oro, Ap 1:20\n② El misterio de la prostituta, Babilonia y la bestia de siete cabezas y diez cuernos, Ap 17:5~7\n③ El misterio de la séptima y última trompeta, Ap 10:7"
+            },
+            {
+                q: "9. Escriba ① las bendiciones prometidas en Ap 2~3 que se le darán al Vencedor, y también escriba ② otra bendición aparte de las anteriores que recibirá el Vencedor junto a su referencia bíblica relacionada.",
+                options: [
+                    "① El fruto del árbol de la vida, la corona de la vida, no sufrir el daño de la segunda muerte, el maná escondido, la piedrecita blanca, la vara de hierro, la estrella de la mañana, vestido de vestiduras blancas, el nombre escrito en el libro de la vida, columna en el templo de Dios, escribir el nombre de Dios, de la Ciudad Santa la Nueva Jerusalén y el nuevo nombre de Jesús, permitir sentarse en el trono de Jesús.\n② El hijo de Dios quien heredará todas las cosas, Ap 21:7",
+                    "① Riquezas terrenales y larga vida corporal\n② Reinado político terrenal",
+                    "① Salud sin enfermedades física\n② Autoridad terrenal"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Las 12 bendiciones prometidas al Vencedor en Ap 2-3.\n② El hijo de Dios quien heredará todas las cosas, Ap 21:7"
+            },
+            {
+                q: "10. ¿① Cuál es el significado de que 'se le escribirá el nombre de Dios, de la Ciudad Santa la Nueva Jerusalén y el nuevo nombre de Jesús sobre el Vencedor', y ② quién es el que recibirá las bendiciones que Jesús prometió en Ap 2~3?",
+                options: [
+                    "① Dios, el Reino de los Cielos y Jesús vienen sobre el Vencedor\n② Aquel que lucha contra los Nicolaítas de Satanás y vence",
+                    "① Que el vencedor va al cielo sin cuerpo\n② Todos los miembros de cualquier iglesia",
+                    "① Que se tatuarán nombres en la piel\n② Solamente los profetas del pasado"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Dios, el Reino de los Cielos y Jesús vienen sobre el Vencedor\n② Aquel que lucha contra los Nicolaítas de Satanás y vence"
+            },
+            {
+                q: "11. En Ap 4:8 dice que el trono de Dios vendrá a esta tierra en el futuro. ① ¿En cuál capítulo de Apocalipsis desciende el trono de Dios? ② ¿Dónde es la realidad verdadera de este lugar?",
+                options: [
+                    "① Monte Sión donde están los 144,000 sellados de las 12 tribus de Ap 14\n② Shincheonji, Iglesia de Jesús, el Templo del Tabernáculo del Testimonio",
+                    "① La ciudad de Roma\n② La catedral del Vaticano",
+                    "① El desierto de Sinaí\n② El templo reconstruido"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Monte Sión donde están los 144,000 sellados de las 12 tribus de Ap 14\n② Shincheonji, Iglesia de Jesús, el Templo del Tabernáculo del Testimonio"
+            },
+
+            {
+                q: "31. Escriba ① cuántas plagas hay en Apocalipsis y qué son, en orden. Y escriba ② cómo difieren los objetivos de los juicios en Ap 6 y Ap 16.",
+                options: [
+                    "① Tres: Siete sellos, siete trompetas, siete copas\n② Ap 6: Traidores\nAp 16: Traidores y destructores",
+                    "① Dos: Diluvio y fuego\n② Ap 6: Gentiles / Ap 16: Judíos",
+                    "① Cuatro: Hambre, pestilencia, espada y fieras\n② Ninguna diferencia"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Tres: Siete sellos, siete trompetas, siete copas\n② Ap 6: Traidores / Ap 16: Traidores y destructores"
+            },
+            {
+                q: "32. Las siete copas del oro de Ap 16, ¿en qué capítulos de Apocalipsis aparecen? ① Escriba dos capítulos. ② ¿Qué se derrama de las copas? ③ ¿A qué lugar y de qué capítulo se derraman las siete copas?",
+                options: [
+                    "① Ap 12, Ap 15\n② La ira de Dios\n③ El tabernáculo de Ap 13 y la Babilonia de Ap 18",
+                    "① Ap 1, Ap 2\n② Bendiciones de gracia\n③ Las siete iglesias de Asia",
+                    "① Ap 20, Ap 21\n② El agua de la vida\n③ La nueva Jerusalén"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Ap 12, Ap 15\n② La ira de Dios\n③ El tabernáculo de Ap 13 y la Babilonia de Ap 18"
+            },
+            {
+                q: "33. Escriba ① el alimento dado por el pastor elegido por Jesús y ② el alimento dado por el pastor elegido por el diablo en el Apocalipsis, junto con versículos bíblicos relacionados.",
+                options: [
+                    "① Ap 2:17 El maná escondido, Ap 10 La palabra revelada, Ap 22 El fruto del árbol de la vida\n② Ap 17:2, Ap 18:3 El vino de la fornicación",
+                    "① El pan y los peces de la multitud\n② La levadura de los fariseos",
+                    "① Las tablas de la ley\n② La carne sacrificada"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Ap 2:17 El maná escondido, Ap 10 La palabra revelada, Ap 22 El fruto del árbol de la vida\n② Ap 17:2, Ap 18:3 El vino de la fornicación"
+            },
+            {
+                q: "34. ① ¿Qué es el \"vino de la fornicación\"? Y según Ap 18, ② ¿Con quién se casaron las naciones caídas y quienes bebieron el vino de la fornicación? ③ ¿Quiénes son esposos y esposas que se casan?",
+                options: [
+                    "① Falsa doctrina (el fruto del árbol de la ciencia del bien y del mal).\n② El dios del dragón, es decir Satanás.\n③ Satanás y los congregados que pertenecen a él.",
+                    "① Bebida alcohólica física\n② Reyes de la tierra secular\n③ Los gobernantes políticos",
+                    "① Falso evangelio antiguo\n② Los falsos maestros griegos\n③ Filosofías paganas"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Falsa doctrina (el fruto del árbol de la ciencia del bien y del mal).\n② El dios del dragón, es decir Satanás.\n③ Satanás y los congregados que pertenecen a él."
+            },
+            {
+                q: "35. ① ¿Cuál es la razón por la que Dios aún no ha juzgado a Babilonia?, escriba la respuesta junto con un versículo bíblico relacionado. Y ② ¿por quién y ③ con qué cosa este juicio se realizará?",
+                options: [
+                    "① Ap 18:4, porque no todo el pueblo de Dios ha salido de ella todavía.\n② Dios\n③ Fuego",
+                    "① Porque Babilonia se arrepentirá pronto\n② Los ángeles del abismo\n③ Agua de diluvio",
+                    "① Porque Dios olvidó sus pecados\n② Los reyes gentiles\n③ Terremoto físico"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Ap 18:4, porque no todo el pueblo de Dios ha salido de ella todavía.\n② Dios\n③ Fuego"
+            },
+            {
+                q: "36. ① ¿Después de qué evento Ap 19 se cumple? ② ¿Cuáles son los dos eventos que se cumplan en Ap 19?",
+                options: [
+                    "① Después del juicio de Babilonia en Ap 18\n② Las bodas entre los espíritus y las carnes, Dios viene y reina.",
+                    "① Después del fin de los mil años\n② La destrucción de la tierra y del mar",
+                    "① Después del sexto sello\n② La caída de las estrellas"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Después del juicio de Babilonia en Ap 18\n② Las bodas entre los espíritus y las carnes, Dios viene y reina."
+            },
+            {
+                q: "37. ① ¿Quiénes son los poderosos que se sientan en tronos y juzgan después de que se captura el dragón en Ap 20? ② ¿Quiénes participarán en la primera resurrección y reinarán con Cristo? ③ ¿Quiénes serán juzgados después de los mil años?",
+                options: [
+                    "① Los doce discípulos espirituales y físicos de Jesús.\n② Los espíritus del martirio y los sobrevivientes que no recibieron la marca de la bestia sino recibieron el sello de Dios.\n③ Gog y Magog, los espíritus cuya carne ha muerto.",
+                    "① Los reyes seculares del mundo\n② Todos los hombres buenos de la historia\n③ Los habitantes de las naciones antiguas",
+                    "① Los cuatro seres vivientes\n② Los ángeles fieles únicamente\n③ Nadie en absoluto"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① Los doce discípulos espirituales y físicos de Jesús.\n② Los espíritus del martirio y los sobrevivientes que no recibieron la marca de la bestia sino recibieron el sello de Dios.\n③ Gog y Magog, los espíritus cuya carne ha muerto."
+            },
+            {
+                q: "38. ① ¿Qué evento en qué capítulo es el comienzo del cumplimento del Apocalipsis\"? y ② ¿qué evento en qué capítulo será \"La perfección del Apocalipsis\"?",
+                options: [
+                    "① La aparición de Jesús de la Segunda Venida, Ap 1,2,3\n② Dios y el cielo descienden a Shincheonji en Ap 21",
+                    "① La creación de Génesis 1\n② El juicio del trono blanco en Ap 20",
+                    "① El nacimiento de Jesús en Belén\n② El derramamiento de la séptima copa"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① La aparición de Jesús de la Segunda Venida, Ap 1,2,3\n② Dios y el cielo descienden a Shincheonji en Ap 21"
+            },
+            {
+                q: "39. De los 66 libros de la Biblia, ① ¿cuál es la profecía más importante y grande? Y entre ella, ② ¿cuál es el capítulo más importante? y ③ ¿por qué?",
+                options: [
+                    "① El Apocalipsis\n② Ap 21\n③ Porque es una promesa del propósito de Dios: la creación de un cielo nuevo y una tierra nueva",
+                    "① El libro de Génesis\n② Génesis 1\n③ Porque explica el origen de las plantas",
+                    "① Los Evangelios\n② Mateo 24\n③ Porque habla de señales"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial:\n① El Apocalipsis\n② Ap 21\n③ Porque es una promesa del propósito de Dios: la creación de un cielo nuevo y una tierra nueva"
+            },
+            {
+                q: "40. Escriba ① la razón por la que el Apocalipsis es el libro más importante en el momento de la Segunda Venida del Señor con el versículo que respalda. ② ¿Cuál es la \"verdad suprema\" y ③ dónde se encuentra?",
+                options: [
+                    "① Porque añadir o quitar impide entrar al cielo (Ap 22:18-19).\n② Ap 1 a 22\n③ Shincheonji, la Ciudad de la Verdad",
+                    "① Porque fue escrito por Juan en la isla de Patmos.\n② Los diez mandamientos\n③ En Jerusalén física",
+                    "① Porque contiene símbolos alegóricos profundos.\n② Los libros poéticos\n③ En los seminarios del mundo"
+                ],
+                correct: 0,
+                explanation: "Respuesta Oficial (Estructura Word Exacta):\n① Porque añadir o quitar impide entrar al cielo (Ap 22:18-19).\n② Ap 1 a 22\n③ Shincheonji, la Ciudad de la Verdad"
+            }
+        ];
+
+        let currentQuizData = [];
+        let currentExamTitle = "";
+        let currentQuestionIdx = 0;
+        let userAnswers = [];
+        let scoreCount = 0;
+
+        function startExam(examKey) {
+            const exam = EXAMS_DATABASE[examKey];
+            if (!exam) return;
+
+            currentQuizData = exam.questions;
+            currentExamTitle = exam.title;
+            initQuiz();
+        }
+
+        function startGraduationBlock(blockNum) {
+            let selectedQuestions = [];
+            let blockTitle = "Examen de Graduación Integral";
+
+            if (blockNum === 1) {
+                selectedQuestions = GRADUATION_QUESTIONS.slice(0, 10);
+                blockTitle += " (Parte 1: Q1-10)";
+            } else if (blockNum === 2) {
+                selectedQuestions = GRADUATION_QUESTIONS.slice(10, 20);
+                blockTitle += " (Parte 2: Q11-20)";
+            } else if (blockNum === 3) {
+                selectedQuestions = GRADUATION_QUESTIONS.slice(20, 30);
+                blockTitle += " (Parte 3: Q21-30)";
+            } else if (blockNum === 4) {
+                selectedQuestions = GRADUATION_QUESTIONS.slice(30, 40);
+                blockTitle += " (Parte 4: Q31-40)";
+            } else if (blockNum === 'all') {
+                selectedQuestions = GRADUATION_QUESTIONS;
+                blockTitle += " (Completo: 40 Preguntas)";
+            }
+
+            currentQuizData = selectedQuestions;
+            currentExamTitle = blockTitle;
+            initQuiz();
+        }
+
+        function initQuiz() {
+            currentQuestionIdx = 0;
+            scoreCount = 0;
+            userAnswers = [];
+
+            document.getElementById('dashboardScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('quizScreen').style.display = 'block';
+
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const qData = currentQuizData[currentQuestionIdx];
+
+            document.getElementById('quizProgressBadge').innerText = `Pregunta ${currentQuestionIdx + 1} de ${currentQuizData.length}`;
+            document.getElementById('questionNumHeader').innerText = `Pregunta ${currentQuestionIdx + 1}`;
+            
+            // Aplicar formato para que la pregunta respete renglones de ①, ②, ③
+            document.getElementById('questionText').innerText = formatSubItems(qData.q);
+            document.getElementById('liveScoreTracker').innerText = `Aciertos: ${scoreCount}`;
+
+            const container = document.getElementById('optionsContainer');
+            container.innerHTML = '';
+
+            const letters = ['A', 'B', 'C', 'D'];
+
+            qData.options.forEach((optText, idx) => {
+                const card = document.createElement('div');
+                card.className = 'option-card';
+                card.onclick = () => selectOption(idx);
+
+                // Aplicar formato para que cada sub-elemento ①, ②, ③ aparezca en su propio renglón
+                const formattedOptionText = formatSubItems(optText);
+
+                card.innerHTML = `
+                    <span class="opt-letter">${letters[idx]}.</span>
+                    <div class="option-text-formatted">${formattedOptionText}</div>
+                `;
+                container.appendChild(card);
+            });
+
+            const feedbackPanel = document.getElementById('feedbackPanel');
+            feedbackPanel.className = 'feedback-panel';
+            feedbackPanel.style.display = 'none';
+
+            document.getElementById('btnNext').disabled = true;
+        }
+
+        function selectOption(optionIdx) {
+            const qData = currentQuizData[currentQuestionIdx];
+            const optionCards = document.querySelectorAll('.option-card');
+
+            optionCards.forEach(c => c.classList.add('disabled'));
+
+            const isCorrect = (optionIdx === qData.correct);
+
+            userAnswers[currentQuestionIdx] = {
+                question: qData.q,
+                selected: optionIdx,
+                correct: qData.correct,
+                isCorrect: isCorrect,
+                explanation: qData.explanation,
+                options: qData.options
+            };
+
+            if (isCorrect) {
+                optionCards[optionIdx].classList.add('selected-correct');
+                scoreCount++;
+                document.getElementById('liveScoreTracker').innerText = `Aciertos: ${scoreCount}`;
+                showFeedback(true, "¡Respuesta Correcta!", qData.explanation);
+            } else {
+                optionCards[optionIdx].classList.add('selected-incorrect');
+                optionCards[qData.correct].classList.add('selected-correct');
+                showFeedback(false, "Respuesta Incorrecta", qData.explanation);
+            }
+
+            document.getElementById('btnNext').disabled = false;
+        }
+
+        function showFeedback(isCorrect, title, expText) {
+            const panel = document.getElementById('feedbackPanel');
+            panel.className = `feedback-panel show ${isCorrect ? 'correct' : 'incorrect'}`;
+            
+            const formattedExp = formatSubItems(expText);
+            panel.innerHTML = `
+                <div style="font-weight:700; font-family:'Poppins',sans-serif; margin-bottom:6px;">
+                    <i class="fa-solid ${isCorrect ? 'fa-circle-check' : 'fa-circle-xmark'}"></i> ${title}
+                </div>
+                <div style="white-space: pre-line;">${formattedExp}</div>
+            `;
+        }
+
+        function nextQuestion() {
+            currentQuestionIdx++;
+            if (currentQuestionIdx < currentQuizData.length) {
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'block';
+
+            document.getElementById('resultsExamTitle').innerText = currentExamTitle;
+            document.getElementById('finalScoreDisplay').innerText = `${scoreCount} / ${currentQuizData.length}`;
+
+            const percent = (scoreCount / currentQuizData.length) * 100;
+            let comment = "";
+            if (percent === 100) {
+                comment = "¡Excelente preparación! Has respondido a la perfección todas las preguntas oficiales.";
+            } else if (percent >= 70) {
+                comment = "¡Buen trabajo! Posees un dominio muy sólido del temario de examen.";
+            } else {
+                comment = "Te recomendamos volver a repasar la lección y poner a prueba tus conocimientos nuevamente.";
+            }
+            document.getElementById('finalScoreComment').innerText = comment;
+
+            const reviewList = document.getElementById('reviewList');
+            reviewList.innerHTML = '<h3 style="font-family:\'Playfair Display\', serif; font-size:22px; color: var(--primary-warm); margin-bottom:15px;">Resumen del Examen:</h3>';
+
+            userAnswers.forEach((ans, idx) => {
+                const item = document.createElement('div');
+                item.className = `review-card-item ${ans.isCorrect ? 'is-correct' : 'is-incorrect'}`;
+
+                const userOptFormatted = formatSubItems(ans.options[ans.selected]);
+                const correctOptFormatted = formatSubItems(ans.options[ans.correct]);
+
+                item.innerHTML = `
+                    <div style="font-size:12px; font-weight:700; color:var(--primary-accent); text-transform:uppercase; margin-bottom:4px;">Pregunta ${idx + 1}</div>
+                    <div style="font-weight:700; color:var(--primary-warm); margin-bottom:8px; white-space:pre-line;">${formatSubItems(ans.question)}</div>
+                    <div style="font-size:14px; margin-top:4px; white-space:pre-line;"><strong>Tu respuesta:</strong><br>${userOptFormatted} ${ans.isCorrect ? '✅' : '❌'}</div>
+                    ${!ans.isCorrect ? `<div style="font-size:14px; color:var(--correct-border); margin-top:6px; white-space:pre-line;"><strong>Respuesta correcta:</strong><br>${correctOptFormatted}</div>` : ''}
+                    <div style="font-size:13px; color:var(--text-muted); font-style:italic; margin-top:8px; white-space:pre-line;">${formatSubItems(ans.explanation)}</div>
+                `;
+                reviewList.appendChild(item);
+            });
+        }
+
+        function returnToDashboard() {
+            document.getElementById('quizScreen').style.display = 'none';
+            document.getElementById('resultsScreen').style.display = 'none';
+            document.getElementById('dashboardScreen').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
